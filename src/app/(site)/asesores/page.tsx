@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { connection } from "next/server";
 import Image from "next/image";
 import Link from "next/link";
 import { createLoader } from "nuqs/server";
@@ -54,6 +55,9 @@ export default function AdvisorsPage({ searchParams }: PageProps<"/asesores">) {
 
 async function Locator({ searchParams }: Pick<PageProps<"/asesores">, "searchParams">) {
   const params = await loadParams(searchParams);
+  // La vigencia de las zonas depende de la fecha de hoy: se calcula en cada solicitud.
+  await connection();
+  const today = new Date().toISOString().slice(0, 10);
   const [settings, { advisors, coverages }, hubs, product] = await Promise.all([
     getSiteSettings(),
     getAdvisorsAndCoverages(),
@@ -73,6 +77,7 @@ async function Locator({ searchParams }: Pick<PageProps<"/asesores">, "searchPar
         advisors,
         coverages,
         fallback: settings.fallbackContact,
+        today,
       })
     : outside
       ? { local: [], regional: [], fallback: settings.fallbackContact }

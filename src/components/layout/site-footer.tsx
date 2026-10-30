@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { NAV_LINKS } from "./nav-links";
+import { CookiePreferencesButton } from "@/components/analytics/consent";
 import type { LegalPage, SiteSettings } from "@/lib/content/types";
 import { cacheLife } from "next/cache";
 
@@ -82,6 +83,9 @@ export function SiteFooter({
                 </Link>
               </li>
             ))}
+            <li>
+              <CookiePreferencesButton />
+            </li>
           </ul>
         </div>
       </div>

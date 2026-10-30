@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { MobileContactBar } from "@/components/layout/mobile-contact-bar";
 import { PrototypeBanner } from "@/components/layout/prototype-banner";
+import { CookieConsent } from "@/components/analytics/consent";
 import { IS_PROTOTYPE, getHubCities, getLegalPages, getSiteSettings } from "@/lib/content";
 import { jsonLdScript, organizationJsonLd } from "@/lib/seo";
 
@@ -24,6 +25,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       </main>
       <SiteFooter settings={settings} legal={legal} hubs={hubs} />
       <MobileContactBar />
+      <CookieConsent />
       {/* Espacio para que la barra fija de móvil no tape el pie de página. */}
       <div aria-hidden className="h-20 bg-antracita-900 md:hidden" />
       <script

@@ -16,6 +16,7 @@ Vercel → proyecto → *Settings* → *Environment Variables*:
 | `NEXT_PUBLIC_SITE_URL` | `https://su-dominio` (o la URL de Vercel) | Canonical, sitemap y enlace del producto en WhatsApp |
 | `SANITY_REVALIDATE_SECRET` | Una clave larga al azar (la misma del paso 4) | Asegura que solo Sanity pueda actualizar el sitio |
 | `NEXT_PUBLIC_CONTENT_SOURCE` | `sanity` — **solo en el paso 6** | Cambia de datos ficticios a contenido real |
+| `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` (opcional) | Activa Google Tag Manager con aviso de cookies. Sin él no hay analítica ni aviso |
 
 Después de agregar o cambiar variables: *Deployments* → último despliegue → *Redeploy*.
 
@@ -81,4 +82,6 @@ Para volver al prototipo, borrar la variable y redesplegar.
 - El dataset es público para lectura (lo normal en sitios web): **no guarde datos privados** en el CMS. Los campos «Fuente (uso interno)» no se muestran en el sitio, pero son legibles por API.
 - Las alertas de `npm audit` provienen de las herramientas de línea de comandos de Sanity (procesan archivos locales), no del sitio publicado. Se revisarán con las siguientes versiones de Sanity.
 - La herramienta «Territorios» usa una copia de DIVIPOLA cruzada de dos fuentes públicas (el portal del DANE no era accesible desde el entorno de desarrollo). Validar contra el archivo oficial del DANE antes de salir a producción.
-- Pendiente para la Fase 4: vista previa de borradores directamente en el sitio (Presentation / Draft Mode), banner de cookies + Google Tag Manager, pruebas e2e en CI.
+- Analítica: con `NEXT_PUBLIC_GTM_ID`, GTM solo se carga si el visitante acepta cookies. Eventos enviados a `dataLayer`: `view_item`, `search_products`, `advisor_search`, `whatsapp_click` (intención de contacto, no venta) y `file_download`. Para verlos en GA4, crear en GTM un activador de «Evento personalizado» por cada nombre.
+- Calidad automática (GitHub Actions, `.github/workflows/ci.yml`): tipos, lint, pruebas unitarias, compilación, pruebas en navegador (móvil y escritorio) y auditoría WCAG 2.1 AA en cada cambio.
+- Pendiente: vista previa de borradores directamente en el sitio (requiere un token de lectura de Sanity).

@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Sistema de diseño Microdent
+ * Colores del manual de marca 2025: Glauco #8BCED7, Antracita #575756, blanco y negro.
+ * Contraste verificado (WCAG AA):
+ *   antracita sobre blanco 7,23:1 → texto y botones
+ *   glauco sobre blanco 1,76:1   → SOLO fondos, bordes decorativos e ilustración
+ *   negro sobre glauco 11,9:1    → texto encima de fondos glauco
+ */
+@theme {
+  --color-glauco: #8bced7;
+  --color-glauco-50: #f4f9fa;
+  --color-glauco-100: #e8f5f7;
+  --color-glauco-200: #cfe9ed;
+  --color-antracita: #575756;
+  --color-antracita-900: #2b2b2a;
+  --color-ink: #2b2b2a;
+  --color-ink-muted: #575756;
+  --color-ink-subtle: #6b6b6a;
+  --color-line: #e4e4e3;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f6f6f5;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-montserrat), var(--font-inter), ui-sans-serif, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Foco visible en todo elemento interactivo: anillo negro (21:1) con halo glauco. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px var(--color-glauco);
+    border-radius: var(--radius-sm);
+  }
+  .on-dark :where(a, button, input, select, summary):focus-visible {
+    outline-color: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}

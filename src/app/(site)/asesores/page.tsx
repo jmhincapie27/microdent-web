@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { createLoader } from "nuqs/server";
 import { Building2, Globe, MapPin, X } from "lucide-react";
@@ -252,17 +253,27 @@ function AdvisorGroup({
         {items.map(({ advisor, zoneName, hubCity }) => (
           <li key={advisor.id} className="flex flex-col rounded-lg border border-line bg-white p-5">
             <div className="flex items-center gap-4">
-              <span
-                aria-hidden
-                className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-glauco-100 font-display text-lg font-semibold text-ink"
-              >
-                {advisor.publicName
-                  .split(" ")
-                  .filter((w) => /^[A-ZÁÉÍÓÚÑ0-9]/.test(w))
-                  .slice(0, 2)
-                  .map((w) => w[0])
-                  .join("")}
-              </span>
+              {advisor.photo ? (
+                <Image
+                  src={advisor.photo.src}
+                  alt=""
+                  width={56}
+                  height={56}
+                  className="size-14 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-glauco-100 font-display text-lg font-semibold text-ink"
+                >
+                  {advisor.publicName
+                    .split(" ")
+                    .filter((w) => /^[A-ZÁÉÍÓÚÑ0-9]/.test(w))
+                    .slice(0, 2)
+                    .map((w) => w[0])
+                    .join("")}
+                </span>
+              )}
               <div>
                 <p className="font-display font-semibold">{advisor.publicName}</p>
                 <p className="text-sm text-ink-muted">{advisor.role}</p>

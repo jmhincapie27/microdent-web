@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { MobileContactBar } from "@/components/layout/mobile-contact-bar";
 import { PrototypeBanner } from "@/components/layout/prototype-banner";
+import { PreviewBanner } from "@/components/layout/preview-banner";
 import { CookieConsent } from "@/components/analytics/consent";
 import { IS_PROTOTYPE, getHubCities, getLegalPages, getSiteSettings } from "@/lib/content";
 import { jsonLdScript, organizationJsonLd } from "@/lib/seo";
@@ -18,6 +20,9 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       >
         Saltar al contenido
       </a>
+      <Suspense fallback={null}>
+        <PreviewBanner />
+      </Suspense>
       {IS_PROTOTYPE && <PrototypeBanner />}
       <SiteHeader />
       <main id="contenido" tabIndex={-1} className="flex-1 outline-none">

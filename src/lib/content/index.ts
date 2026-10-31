@@ -1,8 +1,9 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { draftMode } from "next/headers";
 import * as mock from "@/mocks/content";
 import { contentSource } from "@/sanity/env";
-import { sanityClient } from "@/sanity/client";
+import { previewClient, readToken, sanityClient } from "@/sanity/client";
 import {
   ABOUT_QUERY,
   ADVISORS_QUERY,
@@ -48,10 +49,21 @@ import type {
  */
 
 export const IS_PROTOTYPE = contentSource === "mock";
-const useSanity = contentSource === "sanity";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fetchSanity = <T,>(query: string, params: Record<string, unknown> = {}) => sanityClient.fetch<T>(query, params as any);
+/**
+ * Elige de dónde leer. En vista previa (Draft Mode, activada desde el panel) siempre se leen
+ * los borradores de Sanity, aunque el sitio público siga con los datos del prototipo.
+ * En vista previa Next.js no guarda nada en caché: cada visita ve el último borrador.
+ */
+async function source() {
+  const { isEnabled: preview } = await draftMode();
+  const client = preview && readToken ? previewClient : sanityClient;
+  return {
+    sanity: preview || contentSource === "sanity",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetch: <T,>(query: string, params: Record<string, unknown> = {}) => client.fetch<T>(query, params as any),
+  };
+}
 
 const byOrder = <T extends { order: number }>(a: T, b: T) => a.order - b.order;
 
@@ -75,8 +87,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   "use cache";
   cacheLife("hours");
   cacheTag("settings");
-  if (!useSanity) return mock.siteSettings;
-  const s = await fetchSanity<Partial<SiteSettings> | null>(SETTINGS_QUERY);
+  const src = await source();
+  if (!src.sanity) return mock.siteSettings;
+  const s = await src.fetch<Partial<SiteSettings> | null>(SETTINGS_QUERY);
   return {
     ...defaultSettings,
     fallbackContact: { ...defaultSettings.fallbackContact, ...(s?.fallbackContact ?? {}) },
@@ -90,8 +103,9 @@ export async function getHomePage(): Promise<HomePage> {
   "use cache";
   cacheLife("hours");
   cacheTag("home");
-  if (!useSanity) return mock.homePage;
-  const h = await fetchSanity<Partial<HomePage> | null>(HOME_QUERY);
+  const src = await source();
+  if (!src.sanity) return mock.homePage;
+  const h = await src.fetch<Partial<HomePage> | null>(HOME_QUERY);
   if (!h) return defaultHome;
   return {
     heroEyebrow: h.heroEyebrow ?? defaultHome.heroEyebrow,
@@ -109,8 +123,9 @@ export async function getAboutPage(): Promise<AboutPage> {
   "use cache";
   cacheLife("hours");
   cacheTag("about");
-  if (!useSanity) return mock.aboutPage;
-  const a = await fetchSanity<(Omit<AboutPage, "image"> & { image: AboutPage["image"] | null }) | null>(ABOUT_QUERY);
+  const src = await source();
+  if (!src.sanity) return mock.aboutPage;
+  const a = await src.fetch<(Omit<AboutPage, "image"> & { image: AboutPage["image"] | null }) | null>(ABOUT_QUERY);
   return a ? { ...a, image: a.image ?? undefined } : { title: "Nosotros", intro: "", sections: [] };
 }
 
@@ -118,8 +133,9 @@ export async function getLegalPages(): Promise<LegalPage[]> {
   "use cache";
   cacheLife("hours");
   cacheTag("legal");
-  if (!useSanity) return mock.legalPages;
-  return fetchSanity<LegalPage[]>(LEGAL_QUERY);
+  const src = await source();
+  if (!src.sanity) return mock.legalPages;
+  return src.fetch<LegalPage[]>(LEGAL_QUERY);
 }
 
 export async function getLegalPage(slug: string): Promise<LegalPage | undefined> {
@@ -135,24 +151,27 @@ export async function getCategories(): Promise<ProductCategory[]> {
   "use cache";
   cacheLife("hours");
   cacheTag("categories");
-  if (!useSanity) return mock.categories.filter((c) => c.active).sort(byOrder);
-  return normalizeCategories(await fetchSanity(CATEGORIES_QUERY));
+  const src = await source();
+  if (!src.sanity) return mock.categories.filter((c) => c.active).sort(byOrder);
+  return normalizeCategories(await src.fetch(CATEGORIES_QUERY));
 }
 
 export async function getLines(): Promise<ProductLine[]> {
   "use cache";
   cacheLife("hours");
   cacheTag("lines");
-  if (!useSanity) return mock.lines.filter((l) => l.active).sort(byOrder);
-  return normalizeLines(await fetchSanity(LINES_QUERY));
+  const src = await source();
+  if (!src.sanity) return mock.lines.filter((l) => l.active).sort(byOrder);
+  return normalizeLines(await src.fetch(LINES_QUERY));
 }
 
 export async function getProducts(): Promise<Product[]> {
   "use cache";
   cacheLife("hours");
   cacheTag("products");
-  if (!useSanity) return mock.products.filter((p) => p.active).sort(byOrder);
-  return normalizeProducts(await fetchSanity(PRODUCTS_QUERY));
+  const src = await source();
+  if (!src.sanity) return mock.products.filter((p) => p.active).sort(byOrder);
+  return normalizeProducts(await src.fetch(PRODUCTS_QUERY));
 }
 
 export async function getProductsByIds(ids: string[]): Promise<Product[]> {
@@ -165,8 +184,9 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
 
 async function getDocuments(ids: string[]): Promise<ProductDocument[]> {
   if (ids.length === 0) return [];
-  if (!useSanity) return mock.documents.filter((d) => d.active && ids.includes(d.id));
-  const docs = await fetchSanity<ProductDocument[]>(DOCUMENTS_QUERY, { ids });
+  const src = await source();
+  if (!src.sanity) return mock.documents.filter((d) => d.active && ids.includes(d.id));
+  const docs = await src.fetch<ProductDocument[]>(DOCUMENTS_QUERY, { ids });
   return docs.filter((d) => d.url);
 }
 
@@ -202,10 +222,11 @@ export async function getAdvisorsAndCoverages(): Promise<{
   "use cache";
   cacheLife("hours");
   cacheTag("advisors");
-  if (!useSanity) return { advisors: mock.advisors, coverages: mock.coverages };
+  const src = await source();
+  if (!src.sanity) return { advisors: mock.advisors, coverages: mock.coverages };
   const [advisors, coverages] = await Promise.all([
-    fetchSanity<Parameters<typeof normalizeAdvisors>[0]>(ADVISORS_QUERY),
-    fetchSanity<RawCoverage[]>(COVERAGES_QUERY),
+    src.fetch<Parameters<typeof normalizeAdvisors>[0]>(ADVISORS_QUERY),
+    src.fetch<RawCoverage[]>(COVERAGES_QUERY),
   ]);
   return { advisors: normalizeAdvisors(advisors), coverages: normalizeCoverages(coverages) };
 }

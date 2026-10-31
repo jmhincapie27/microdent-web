@@ -5,6 +5,7 @@
  */
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
+import { defineLocations, presentationTool } from "sanity/presentation";
 import { visionTool } from "@sanity/vision";
 import { esESLocale } from "@sanity/locale-es-es";
 import { apiVersion, dataset, projectId } from "./src/sanity/env";
@@ -35,6 +36,30 @@ export default defineConfig({
   },
   plugins: [
     structureTool({ structure, title: "Contenido" }),
+    // Vista previa: muestra el sitio con los borradores junto al formulario de edición.
+    presentationTool({
+      title: "Vista previa",
+      previewUrl: { initial: "/", previewMode: { enable: "/api/draft-mode/enable" } },
+      resolve: {
+        locations: {
+          product: defineLocations({
+            select: { title: "name", slug: "slug.current" },
+            resolve: (doc) => ({ locations: doc?.slug ? [{ title: doc.title ?? "Producto", href: `/productos/${doc.slug}` }] : [] }),
+          }),
+          homePage: defineLocations({ locations: [{ title: "Inicio", href: "/" }] }),
+          aboutPage: defineLocations({ locations: [{ title: "Nosotros", href: "/nosotros" }] }),
+          legalPage: defineLocations({
+            select: { title: "title", slug: "slug.current" },
+            resolve: (doc) => ({ locations: doc?.slug ? [{ title: doc.title ?? "Página legal", href: `/legal/${doc.slug}` }] : [] }),
+          }),
+          productCategory: defineLocations({
+            select: { title: "title", slug: "slug.current" },
+            resolve: (doc) => ({ locations: doc?.slug ? [{ title: doc.title ?? "Categoría", href: `/productos?categoria=${doc.slug}` }] : [] }),
+          }),
+          advisorCoverage: defineLocations({ locations: [{ title: "Asesores", href: "/asesores" }] }),
+        },
+      },
+    }),
     divipolaTool(),
     visionTool({ defaultApiVersion: apiVersion, title: "Consultas (técnico)" }),
     esESLocale(),

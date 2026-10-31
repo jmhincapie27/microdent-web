@@ -16,6 +16,7 @@ Vercel → proyecto → *Settings* → *Environment Variables*:
 | `NEXT_PUBLIC_SITE_URL` | `https://su-dominio` (o la URL de Vercel) | Canonical, sitemap y enlace del producto en WhatsApp |
 | `SANITY_REVALIDATE_SECRET` | Una clave larga al azar (la misma del paso 4) | Asegura que solo Sanity pueda actualizar el sitio |
 | `NEXT_PUBLIC_CONTENT_SOURCE` | `sanity` — **solo en el paso 6** | Cambia de datos ficticios a contenido real |
+| `SANITY_API_READ_TOKEN` | Token de lectura de Sanity (ver «Vista previa de borradores») | Permite ver borradores antes de publicar. **Privado**: nunca compartirlo |
 | `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` (opcional) | Activa Google Tag Manager con aviso de cookies. Sin él no hay analítica ni aviso |
 
 Después de agregar o cambiar variables: *Deployments* → último despliegue → *Redeploy*.
@@ -68,6 +69,16 @@ Cómo funciona la publicación:
 - El historial permite ver y restaurar versiones anteriores.
 - El panel valida: referencias duplicadas, textos alternativos, formato de WhatsApp (`+573001234567`), autorización de datos, etc.
 
+## 5b. Vista previa de borradores
+
+1. sanity.io/manage → proyecto → **API** → **Tokens** → *Add API token*.
+   - Name: `Vista previa sitio` · Permissions: **Viewer** → *Save* y copiar el token (solo se muestra una vez).
+2. Vercel → *Environment Variables* → `SANITY_API_READ_TOKEN` = el token → *Redeploy*.
+3. En el panel, pestaña **Vista previa** (arriba): muestra el sitio con los borradores al lado del formulario, y se actualiza mientras edita.
+4. Una franja negra «Vista previa» indica que está viendo borradores; los visitantes no los ven. Botón **Salir de la vista previa** para volver al sitio normal.
+
+En vista previa siempre se leen los datos de Sanity, aunque el sitio público siga mostrando el prototipo: así puede revisar el contenido real antes del paso 6.
+
 ## 6. Activar el contenido real
 
 Cuando el catálogo y los asesores estén cargados y revisados:
@@ -84,4 +95,3 @@ Para volver al prototipo, borrar la variable y redesplegar.
 - La herramienta «Territorios» usa una copia de DIVIPOLA cruzada de dos fuentes públicas (el portal del DANE no era accesible desde el entorno de desarrollo). Validar contra el archivo oficial del DANE antes de salir a producción.
 - Analítica: con `NEXT_PUBLIC_GTM_ID`, GTM solo se carga si el visitante acepta cookies. Eventos enviados a `dataLayer`: `view_item`, `search_products`, `advisor_search`, `whatsapp_click` (intención de contacto, no venta) y `file_download`. Para verlos en GA4, crear en GTM un activador de «Evento personalizado» por cada nombre.
 - Calidad automática (GitHub Actions, `.github/workflows/ci.yml`): tipos, lint, pruebas unitarias, compilación, pruebas en navegador (móvil y escritorio) y auditoría WCAG 2.1 AA en cada cambio.
-- Pendiente: vista previa de borradores directamente en el sitio (requiere un token de lectura de Sanity).

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageCircle, ShieldCheck } from "lucide-react";
 import { getProductBySlug, getProducts } from "@/lib/content";
+import { atLeastOne } from "@/lib/static-params";
 import { breadcrumbJsonLd, buildMetadata, jsonLdScript, productJsonLd } from "@/lib/seo";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { ProductGallery } from "@/components/product/product-gallery";
@@ -15,7 +16,7 @@ import { Button } from "@/components/ui/button";
 
 export async function generateStaticParams() {
   const products = await getProducts();
-  return products.map((p) => ({ slug: p.slug }));
+  return atLeastOne(products.map((p) => ({ slug: p.slug })));
 }
 
 export async function generateMetadata({ params }: PageProps<"/productos/[slug]">): Promise<Metadata> {

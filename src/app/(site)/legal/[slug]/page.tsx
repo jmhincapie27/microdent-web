@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLegalPage, getLegalPages } from "@/lib/content";
+import { atLeastOne } from "@/lib/static-params";
 import { buildMetadata } from "@/lib/seo";
 
 export async function generateStaticParams() {
-  return (await getLegalPages()).map((p) => ({ slug: p.slug }));
+  return atLeastOne((await getLegalPages()).map((p) => ({ slug: p.slug })));
 }
 
 export async function generateMetadata({ params }: PageProps<"/legal/[slug]">): Promise<Metadata> {

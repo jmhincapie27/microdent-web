@@ -2,6 +2,7 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 import { EarthGlobeIcon } from "@sanity/icons/EarthGlobe";
 import { PinIcon } from "@sanity/icons/Pin";
 import { UserIcon } from "@sanity/icons/User";
+import divipola from "@/data/divipola.json";
 import { activeField, imageWithAlt, whatsappValidation } from "./shared";
 
 /**
@@ -96,17 +97,33 @@ export const advisorCoverage = defineType({
     defineField({ name: "zoneName", title: "Nombre de la zona", description: "Ej.: Eje Cafetero", type: "string", validation: (r) => r.required() }),
     defineField({ name: "hubCity", title: "Ciudad sede", description: "Ej.: Pereira", type: "string", validation: (r) => r.required() }),
     defineField({
-      name: "departments",
+      name: "departmentCodes",
       title: "Departamentos completos",
-      description: "Todos los municipios de estos departamentos quedan cubiertos por la zona.",
+      description: "Marque los departamentos de la zona: todos sus municipios quedan cubiertos.",
       type: "array",
-      of: [defineArrayMember({ type: "reference", to: [{ type: "territory" }], options: { filter: 'kind == "department"', disableNew: true } })],
+      of: [defineArrayMember({ type: "string" })],
+      options: {
+        list: divipola.departments
+          .map((d) => ({ title: d.name, value: d.code }))
+          .sort((a, b) => a.title.localeCompare(b.title, "es")),
+        layout: "grid",
+      },
       validation: (r) => r.unique(),
+    }),
+    // Versión anterior del campo (referencias). Se mantiene oculta para no perder datos ya guardados.
+    defineField({
+      name: "departments",
+      title: "Departamentos (versión anterior)",
+      type: "array",
+      of: [defineArrayMember({ type: "reference", to: [{ type: "territory" }] })],
+      hidden: ({ value }) => !value || (Array.isArray(value) && value.length === 0),
+      readOnly: true,
     }),
     defineField({
       name: "municipalities",
       title: "Municipios específicos",
-      description: "Opcional. Para asignar asesores a municipios puntuales; aparecen primero en esos municipios.",
+      description:
+        "Opcional. Para asignar asesores a municipios puntuales (aparecen primero allí). Escriba el nombre del municipio para buscarlo. Requiere haber cargado los territorios (menú superior «Territorios»).",
       type: "array",
       of: [defineArrayMember({ type: "reference", to: [{ type: "territory" }], options: { filter: 'kind == "municipality"', disableNew: true } })],
       validation: (r) => r.unique(),
@@ -125,8 +142,8 @@ export const advisorCoverage = defineType({
   ],
   validation: (r) =>
     r.custom((doc) => {
-      const d = doc as { departments?: unknown[]; municipalities?: unknown[] } | undefined;
-      return (d?.departments?.length ?? 0) + (d?.municipalities?.length ?? 0) > 0
+      const d = doc as { departmentCodes?: unknown[]; departments?: unknown[]; municipalities?: unknown[] } | undefined;
+      return (d?.departmentCodes?.length ?? 0) + (d?.departments?.length ?? 0) + (d?.municipalities?.length ?? 0) > 0
         ? true
         : "Agregue al menos un departamento o un municipio.";
     }),

@@ -79,7 +79,7 @@ export function normalizeCoverages(raw: RawCoverage[]): AdvisorCoverage[] {
     id: c.id!,
     zoneName: c.zoneName ?? "",
     hubCity: c.hubCity ?? "",
-    departmentCodes: (c.departmentCodes ?? []).filter(Boolean),
+    departmentCodes: [...new Set((c.departmentCodes ?? []).filter((x): x is string => typeof x === "string" && x.length > 0))],
     municipalityCodes: (c.municipalityCodes ?? []).filter(Boolean),
     advisors: (c.advisorIds ?? []).map((advisorId, i) => ({ advisorId, priority: i + 1 })),
     validFrom: orUndef(c.validFrom),

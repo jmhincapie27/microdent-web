@@ -56,7 +56,7 @@ export const ADVISORS_QUERY = defineQuery(`*[_type == "advisor"] {
 
 export const COVERAGES_QUERY = defineQuery(`*[_type == "advisorCoverage"] {
   "id": _id, zoneName, hubCity,
-  "departmentCodes": coalesce(departments[]->code, []),
+  "departmentCodes": coalesce(departmentCodes, []) + coalesce(departments[]->code, []),
   "municipalityCodes": coalesce(municipalities[]->code, []),
   "advisorIds": coalesce(advisors[]._ref, []),
   validFrom, validUntil,

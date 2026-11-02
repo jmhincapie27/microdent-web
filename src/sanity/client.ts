@@ -2,12 +2,16 @@ import "server-only";
 import { createClient } from "next-sanity";
 import { apiVersion, dataset, projectId } from "./env";
 
-/** Cliente de solo lectura del contenido publicado (sin borradores), vía CDN. */
+/**
+ * Cliente de solo lectura del contenido publicado (sin borradores).
+ * Sin CDN de Sanity: el sitio ya guarda en caché cada consulta y la refresca con el webhook.
+ * Con CDN, al publicar podía leerse la copia anterior y quedar guardada hasta 1 hora.
+ */
 export const sanityClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: true,
+  useCdn: false,
   perspective: "published",
 });
 

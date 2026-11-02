@@ -13,6 +13,17 @@ const image = /* groq */ `{
   "alt": coalesce(alt, "")
 }`;
 
+/** Texto enriquecido: resuelve las imágenes insertadas con su URL y tamaño. */
+const richText = /* groq */ `[]{
+  ...,
+  _type == "richImage" => {
+    _type, _key, alt, caption, size,
+    "src": asset->url,
+    "width": asset->metadata.dimensions.width,
+    "height": asset->metadata.dimensions.height
+  }
+}`;
+
 export const CATEGORIES_QUERY = defineQuery(`*[_type == "productCategory" && active != false && defined(slug.current)] | order(orderRank) {
   "id": _id, title, "slug": slug.current, description,
   "image": select(defined(image.asset) => image${image}, null),
@@ -28,6 +39,7 @@ const productFields = /* groq */ `
   "categoryId": category._ref, "lineId": line._ref,
   "images": coalesce(images[defined(asset)]${image}, []),
   shortDescription,
+  "description": description${richText},
   "features": coalesce(features[]{text, source}, []),
   "specs": coalesce(specs[]{label, value, unit}, []),
   "variants": coalesce(variants[active != false]{reference, "attributes": coalesce(attributes[]{label, value}, []), "active": true}, []),
@@ -72,12 +84,19 @@ export const HOME_QUERY = defineQuery(`*[_id == "homePage"][0] {
 }`);
 
 export const ABOUT_QUERY = defineQuery(`*[_id == "aboutPage"][0] {
-  title, intro, "sections": coalesce(sections[]{title, text}, []),
+  title, intro,
+  "sections": coalesce(sections[]{
+    title, text, imagePosition,
+    "body": body${richText},
+    "image": select(defined(image.asset) => image${image}, null)
+  }, []),
   "image": select(defined(image.asset) => image${image}, null)
 }`);
 
 export const LEGAL_QUERY = defineQuery(`*[_type == "legalPage" && defined(slug.current)] | order(title asc) {
-  title, "slug": slug.current, updatedAt, "body": coalesce(body, [])
+  title, "slug": slug.current, updatedAt,
+  "content": content${richText},
+  "legacyBody": body
 }`);
 
 export const SETTINGS_QUERY = defineQuery(`*[_id == "siteSettings"][0] {

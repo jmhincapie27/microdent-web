@@ -19,6 +19,7 @@ export function normalizeProducts(raw: Nullable<Product>[]): Product[] {
     lineId: orUndef(p.lineId),
     images: (p.images ?? []).filter((img) => img?.src && img.width && img.height),
     shortDescription: p.shortDescription ?? "",
+    description: p.description?.length ? p.description : undefined,
     features: p.features ?? [],
     specs: (p.specs ?? []).map((s) => ({ ...s, unit: orUndef(s.unit) })),
     variants: p.variants ?? [],

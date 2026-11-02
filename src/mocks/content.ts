@@ -22,6 +22,7 @@ import type {
   ProductLine,
   SiteSettings,
 } from "@/lib/content/types";
+import { textToBlocks } from "@/lib/rich-text";
 
 /* ---------- Fotografías reales (sin modificar) ---------- */
 
@@ -125,6 +126,25 @@ export const products: Product[] = [
     categoryId: "cat-implantes",
     lineId: "line-a",
     images: [photos.parB, photos.parA],
+    // Ejemplo de descripción con formato (texto enriquecido del panel).
+    description: [
+      { _type: "block", _key: "d1", style: "lead", markDefs: [], children: [{ _type: "span", _key: "d1a", text: "Texto de ejemplo con formato: así se verá la descripción detallada que se escribe en el panel.", marks: [] }] },
+      { _type: "block", _key: "d2", style: "h2", markDefs: [], children: [{ _type: "span", _key: "d2a", text: "Subtítulo de ejemplo", marks: [] }] },
+      {
+        _type: "block", _key: "d3", style: "normal", markDefs: [],
+        children: [
+          { _type: "span", _key: "d3a", text: "Párrafo con ", marks: [] },
+          { _type: "span", _key: "d3b", text: "negrita", marks: ["strong"] },
+          { _type: "span", _key: "d3c", text: " y ", marks: [] },
+          { _type: "span", _key: "d3d", text: "cursiva", marks: ["em"] },
+          { _type: "span", _key: "d3e", text: ".", marks: [] },
+        ],
+      },
+      { _type: "block", _key: "d4", style: "normal", listItem: "bullet", level: 1, markDefs: [], children: [{ _type: "span", _key: "d4a", text: "Viñeta de ejemplo 1", marks: [] }] },
+      { _type: "block", _key: "d5", style: "normal", listItem: "bullet", level: 1, markDefs: [], children: [{ _type: "span", _key: "d5a", text: "Viñeta de ejemplo 2", marks: [] }] },
+      { _type: "callout", _key: "d6", title: "Nota destacada de ejemplo", text: "Los elementos se insertan desde el editor del panel." },
+      { _type: "ctaButton", _key: "d7", label: "Ver asesores", href: "/asesores" },
+    ],
     shortDescription: "Descripción corta de ejemplo. Aquí irá el texto aprobado por Microdent para este producto.",
     specs: implantSpecs,
     variants: implantVariants("DEMO-IMP-001"),
@@ -494,9 +514,12 @@ export const aboutPage: AboutPage = {
   intro:
     "Texto de ejemplo. Esta página se edita desde el CMS con el contenido institucional aprobado por Microdent.",
   sections: [
-    { title: "Quiénes somos", text: "Contenido de ejemplo pendiente de aprobación." },
-    { title: "Presencia en Colombia", text: "Medellín, Eje Cafetero, Bogotá, Cali, Costa, Neiva, Santander, Ibagué, Quibdó y Cúcuta." },
-    { title: "Compromiso con el profesional", text: "Contenido de ejemplo pendiente de aprobación." },
+    { title: "Quiénes somos", body: textToBlocks(["Contenido de ejemplo pendiente de aprobación."]) },
+    {
+      title: "Presencia en Colombia",
+      body: textToBlocks(["Medellín, Eje Cafetero, Bogotá, Cali, Costa, Neiva, Santander, Ibagué, Quibdó y Cúcuta."]),
+    },
+    { title: "Compromiso con el profesional", body: textToBlocks(["Contenido de ejemplo pendiente de aprobación."]) },
   ],
   image: photos.coronaPilar,
 };
@@ -506,32 +529,32 @@ export const legalPages: LegalPage[] = [
     slug: "politica-de-privacidad",
     title: "Política de privacidad",
     updatedAt: "2026-10-30",
-    body: [
+    body: textToBlocks([
       "Contenido de ejemplo. El texto definitivo lo debe redactar o aprobar el área legal de Microdent.",
       "Este sitio no solicita registro ni datos personales a los visitantes. El contacto con asesores se hace por WhatsApp, por iniciativa del visitante.",
-    ],
+    ]),
   },
   {
     slug: "tratamiento-de-datos",
     title: "Política de tratamiento de datos personales",
     updatedAt: "2026-10-30",
-    body: [
+    body: textToBlocks([
       "Contenido de ejemplo. Debe cumplir la Ley 1581 de 2012 y el Decreto 1377 de 2013.",
       "Los datos de los asesores publicados en el sitio cuentan con su autorización previa.",
-    ],
+    ]),
   },
   {
     slug: "terminos-de-uso",
     title: "Términos de uso",
     updatedAt: "2026-10-30",
-    body: ["Contenido de ejemplo pendiente de revisión legal."],
+    body: textToBlocks(["Contenido de ejemplo pendiente de revisión legal."]),
   },
   {
     slug: "cookies",
     title: "Política de cookies",
     updatedAt: "2026-10-30",
-    body: [
+    body: textToBlocks([
       "Contenido de ejemplo. La analítica solo se activará con el consentimiento del visitante.",
-    ],
+    ]),
   },
 ];

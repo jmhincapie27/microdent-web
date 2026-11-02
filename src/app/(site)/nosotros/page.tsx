@@ -5,6 +5,8 @@ import { MessageCircle } from "lucide-react";
 import { getAboutPage, getHubCities } from "@/lib/content";
 import { buildMetadata } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getAboutPage();
@@ -36,15 +38,46 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <div className="container-page grid gap-10 py-14 sm:py-20 md:grid-cols-3">
-        {page.sections.map((s) => (
-          <section key={s.title}>
-            <span aria-hidden className="block h-1 w-10 rounded-full bg-glauco" />
-            <h2 className="mt-4 text-xl font-semibold">{s.title}</h2>
-            <p className="mt-2 text-ink-muted">{s.text}</p>
-          </section>
-        ))}
-      </div>
+      {page.sections.some((s) => s.image) ? (
+        // Con imágenes: una sección por fila, la imagen al lado o arriba según se elija en el panel.
+        <div className="container-page space-y-16 py-14 sm:space-y-24 sm:py-20">
+          {page.sections.map((s) => {
+            const pos = s.image ? (s.imagePosition ?? "right") : undefined;
+            return (
+              <section
+                key={s.title}
+                className={cn("grid items-center gap-8", pos && pos !== "top" && "md:grid-cols-2 md:gap-14")}
+              >
+                {s.image && (
+                  <Image
+                    src={s.image.src}
+                    alt={s.image.alt}
+                    width={s.image.width}
+                    height={s.image.height}
+                    sizes={pos === "top" ? "(min-width:1280px) 1200px, 100vw" : "(min-width:768px) 50vw, 100vw"}
+                    className={cn("h-auto w-full rounded-lg bg-white", pos === "right" && "md:order-2")}
+                  />
+                )}
+                <div>
+                  <span aria-hidden className="block h-1 w-10 rounded-full bg-glauco" />
+                  <h2 className="mt-4 text-2xl font-semibold">{s.title}</h2>
+                  <RichText value={s.body} headingLevel={3} className="mt-4" />
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="container-page grid gap-10 py-14 sm:py-20 md:grid-cols-3">
+          {page.sections.map((s) => (
+            <section key={s.title}>
+              <span aria-hidden className="block h-1 w-10 rounded-full bg-glauco" />
+              <h2 className="mt-4 text-xl font-semibold">{s.title}</h2>
+              <RichText value={s.body} headingLevel={3} className="mt-2" />
+            </section>
+          ))}
+        </div>
+      )}
 
       <section className="container-page pb-16">
         <div className="flex flex-col items-start gap-6 rounded-lg bg-antracita-900 p-8 text-white sm:flex-row sm:items-center sm:justify-between on-dark">

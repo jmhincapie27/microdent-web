@@ -185,6 +185,13 @@ export const product = defineType({
       validation: (r) => r.required().max(240),
     }),
     defineField({
+      name: "description",
+      title: "Descripción detallada (opcional)",
+      description: "Texto largo de la ficha, con formato. Solo información verificada.",
+      type: "richText",
+      group: "basico",
+    }),
+    defineField({
       name: "features",
       title: "Características verificadas",
       description: "Solo datos respaldados por documentación oficial. Indique la fuente de cada uno (no se muestra en el sitio).",

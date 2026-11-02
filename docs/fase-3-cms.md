@@ -62,6 +62,13 @@ Sin webhook, los cambios igual aparecen, pero con hasta 1 hora de demora.
 7. **Asesores → Zonas comerciales**: una por zona (Medellín, Eje Cafetero, Bogotá, Cali, Costa, Neiva, Santander, Ibagué, Quibdó, Cúcuta). Elegir departamentos, opcionalmente municipios puntuales, y los asesores **en el orden en que deben aparecer**.
 8. **Página de inicio**, **Nosotros** y **Páginas legales** (privacidad, tratamiento de datos, términos, cookies).
 
+Editor de texto con formato (Nosotros, páginas legales y «Descripción detallada» del producto):
+
+- Barra de herramientas: **negrita**, *cursiva*, subrayado, enlaces, viñetas y lista numerada.
+- Tamaños: menú de estilos → Normal, Título, Subtítulo, Texto grande, Texto pequeño, Cita (se usan estilos predefinidos para mantener la tipografía de la marca).
+- Botón **+** / «Insert» dentro del editor: **Imagen** (con pie de foto y tamaño mediano o ancho completo), **Botón** (texto y enlace) y **Nota destacada**.
+- En Nosotros, cada sección puede tener además una imagen a la derecha, izquierda o arriba.
+
 Cómo funciona la publicación:
 
 - Todo cambio queda como **borrador** hasta pulsar **Publish**. El sitio solo muestra lo publicado.

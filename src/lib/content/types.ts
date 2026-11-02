@@ -3,6 +3,12 @@
  * así el cambio de datos ficticios a CMS no toca los componentes.
  */
 
+/**
+ * Texto enriquecido (Portable Text de Sanity): bloques de texto con formato y
+ * elementos insertados (imagen, botón, nota destacada).
+ */
+export type RichText = Array<{ _type: string; _key?: string; [key: string]: unknown }>;
+
 export interface ImageAsset {
   src: string;
   width: number;
@@ -72,6 +78,8 @@ export interface Product {
   lineId?: string;
   images: ImageAsset[];
   shortDescription: string;
+  /** Descripción detallada con formato (opcional). */
+  description?: RichText;
   features: ProductFeature[];
   specs: ProductSpec[];
   variants: ProductVariant[];
@@ -163,7 +171,12 @@ export interface HomePage {
 export interface AboutPage {
   title: string;
   intro: string;
-  sections: { title: string; text: string }[];
+  sections: {
+    title: string;
+    body: RichText;
+    image?: ImageAsset;
+    imagePosition?: "left" | "right" | "top";
+  }[];
   image?: ImageAsset;
 }
 
@@ -171,7 +184,7 @@ export interface LegalPage {
   slug: string;
   title: string;
   updatedAt: string;
-  body: string[];
+  body: RichText;
 }
 
 export interface Department {

@@ -16,6 +16,7 @@ import {
   PRODUCTS_QUERY,
   SETTINGS_QUERY,
 } from "@/sanity/queries";
+import { textToBlocks } from "@/lib/rich-text";
 import {
   normalizeAdvisors,
   normalizeCategories,
@@ -26,6 +27,8 @@ import {
 } from "./normalize";
 import type {
   AboutPage,
+  ImageAsset,
+  RichText,
   Advisor,
   AdvisorCoverage,
   HomePage,
@@ -125,8 +128,20 @@ export async function getAboutPage(): Promise<AboutPage> {
   cacheTag("about");
   const src = await source();
   if (!src.sanity) return mock.aboutPage;
-  const a = await src.fetch<(Omit<AboutPage, "image"> & { image: AboutPage["image"] | null }) | null>(ABOUT_QUERY);
-  return a ? { ...a, image: a.image ?? undefined } : { title: "Nosotros", intro: "", sections: [] };
+  type RawSection = { title: string; text?: string | null; body?: RichText | null; image?: ImageAsset | null; imagePosition?: AboutPage["sections"][number]["imagePosition"] | null };
+  const a = await src.fetch<{ title: string; intro: string; image: ImageAsset | null; sections: RawSection[] } | null>(ABOUT_QUERY);
+  if (!a) return { title: "Nosotros", intro: "", sections: [] };
+  return {
+    ...a,
+    image: a.image ?? undefined,
+    sections: a.sections.map((sec) => ({
+      title: sec.title,
+      // Contenido con formato; si solo existe el texto anterior (plano), se convierte.
+      body: sec.body?.length ? sec.body : textToBlocks(sec.text ? sec.text.split(/\n{2,}/) : []),
+      image: sec.image ?? undefined,
+      imagePosition: sec.imagePosition ?? undefined,
+    })),
+  };
 }
 
 export async function getLegalPages(): Promise<LegalPage[]> {
@@ -135,7 +150,11 @@ export async function getLegalPages(): Promise<LegalPage[]> {
   cacheTag("legal");
   const src = await source();
   if (!src.sanity) return mock.legalPages;
-  return src.fetch<LegalPage[]>(LEGAL_QUERY);
+  const pages = await src.fetch<(Omit<LegalPage, "body"> & { content: RichText | null; legacyBody: string[] | null })[]>(LEGAL_QUERY);
+  return pages.map(({ content, legacyBody, ...p }) => ({
+    ...p,
+    body: content?.length ? content : textToBlocks(legacyBody ?? []),
+  }));
 }
 
 export async function getLegalPage(slug: string): Promise<LegalPage | undefined> {

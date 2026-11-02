@@ -75,10 +75,43 @@ export const aboutPage = defineType({
         defineArrayMember({
           type: "object",
           name: "section",
+          title: "Sección",
           fields: [
             defineField({ name: "title", title: "Título", type: "string", validation: (r) => r.required() }),
-            defineField({ name: "text", title: "Texto", type: "text", rows: 4, validation: (r) => r.required() }),
+            defineField({
+              name: "body",
+              title: "Contenido",
+              description: "Negritas, viñetas, enlaces, tamaños de texto e inserción de imágenes, botones o notas destacadas.",
+              type: "richText",
+            }),
+            imageWithAlt("image", "Imagen de la sección (opcional)"),
+            defineField({
+              name: "imagePosition",
+              title: "Posición de la imagen",
+              type: "string",
+              options: {
+                list: [
+                  { title: "Derecha", value: "right" },
+                  { title: "Izquierda", value: "left" },
+                  { title: "Arriba (ancho completo)", value: "top" },
+                ],
+                layout: "radio",
+                direction: "horizontal",
+              },
+              initialValue: "right",
+              hidden: ({ parent }) => !(parent as { image?: { asset?: unknown } } | undefined)?.image?.asset,
+            }),
+            // Campo anterior (texto plano): se muestra solo si ya tenía contenido.
+            defineField({
+              name: "text",
+              title: "Texto (versión anterior)",
+              description: "Copie este texto al campo «Contenido» y bórrelo.",
+              type: "text",
+              rows: 3,
+              hidden: ({ value }) => !value,
+            }),
           ],
+          preview: { select: { title: "title", media: "image" } },
         }),
       ],
     }),
@@ -96,12 +129,20 @@ export const legalPage = defineType({
     defineField({ name: "slug", title: "Identificador en la URL", type: "slug", options: { source: "title" }, validation: (r) => r.required() }),
     defineField({ name: "updatedAt", title: "Fecha de actualización", type: "date", validation: (r) => r.required() }),
     defineField({
-      name: "body",
+      name: "content",
       title: "Contenido",
-      description: "Un párrafo por elemento.",
+      description: "Use «Título» y «Subtítulo» para organizar el documento; viñetas para listas.",
+      type: "richText",
+      validation: (r) => r.required().min(1),
+    }),
+    // Campo anterior (un párrafo por elemento): se muestra solo si ya tenía contenido.
+    defineField({
+      name: "body",
+      title: "Contenido (versión anterior)",
+      description: "Copie este texto al campo «Contenido» y bórrelo.",
       type: "array",
-      of: [defineArrayMember({ type: "text", rows: 4 })],
-      validation: (r) => r.min(1),
+      of: [defineArrayMember({ type: "text", rows: 3 })],
+      hidden: ({ value }) => !value || (Array.isArray(value) && value.length === 0),
     }),
   ],
 });

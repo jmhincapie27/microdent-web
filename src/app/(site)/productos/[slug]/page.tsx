@@ -13,6 +13,7 @@ import { DocumentList } from "@/components/product/document-list";
 import { ProductCard } from "@/components/catalog/product-card";
 import { TrackEvent } from "@/components/analytics/track-event";
 import { Button } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -112,6 +113,12 @@ export default async function ProductPage({ params }: PageProps<"/productos/[slu
       </div>
 
       <div className="mt-12">
+        {p.description && p.description.length > 0 && (
+          <Section id="descripcion" title="Descripción">
+            <RichText value={p.description} headingLevel={3} className="max-w-3xl" />
+          </Section>
+        )}
+
         {p.specs.length > 0 && (
           <Section id="especificaciones" title="Especificaciones técnicas">
             <div className="max-w-2xl">
